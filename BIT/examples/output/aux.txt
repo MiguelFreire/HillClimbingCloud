@@ -1,2 +1,0 @@
-Hello World!
-4 instructions in 2 basic blocks were executed in 1 methods.

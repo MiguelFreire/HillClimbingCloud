@@ -17,12 +17,14 @@
 // and modifying this software.
 
 import BIT.highBIT.*;
-import java.io.File;
-import java.util.Enumeration;
-import java.util.Vector;
-
+import java.io.*;
+import java.util.*;
+import BIT.lowBIT.*;
+import java.text.SimpleDateFormat;
 public class StatisticsTool 
-{
+{	
+	private static String metrics_path = "metrics/statistics.txt";
+
 	private static int dyn_method_count = 0;
 	private static int dyn_bb_count = 0;
 	private static int dyn_instr_count = 0;
@@ -122,6 +124,13 @@ public class StatisticsTool
 					String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 					String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 					ClassInfo ci = new ClassInfo(in_filename);
+					/*ClassFile cf = ci.getClassFile();
+					Attribute_Info[] attrs = cf.getAttributeInfo();
+					for (Attribute_Info i:attrs){
+						if(i.attribute_name_index ){
+							cf.constant_pool.get(i.attribute_name_index);
+						}
+					}*/
 					for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
 						Routine routine = (Routine) e.nextElement();
 						routine.addBefore("StatisticsTool", "dynMethodCount", new Integer(1));
@@ -138,23 +147,58 @@ public class StatisticsTool
 		}
 	
     public static synchronized void printDynamic(String foo) 
-		{
-			System.out.println("Dynamic information summary:");
-			System.out.println("Number of methods:      " + dyn_method_count);
-			System.out.println("Number of basic blocks: " + dyn_bb_count);
-			System.out.println("Number of instructions: " + dyn_instr_count);
+		{	
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			String string  = dateFormat.format(new Date());
+
+		
+			String msg = string+"\n"+"Dynamic information summary:\n" + "Number of methods:      " + dyn_method_count 
+			+ "\nNumber of basic blocks: " + dyn_bb_count + "\nNumber of instructions: " + dyn_instr_count;
+			File f = new File(metrics_path);
+			try{
+				if(f.exists() && !f.isDirectory()){
+					appendToFile(msg);
+				}
+				else{
+					writeToFile(msg);
+
+				}
+				System.out.println("Dynamic information summary:");
+				System.out.println("Number of methods:      " + dyn_method_count);
+				System.out.println("Number of basic blocks: " + dyn_bb_count);
+				System.out.println("Number of instructions: " + dyn_instr_count);
+			}
+			catch(IOException e) {
+				System.out.println("ERROR!" + e);
+			}
 		
 			if (dyn_method_count == 0) {
 				return;
 			}
-		
+			
 			float instr_per_bb = (float) dyn_instr_count / (float) dyn_bb_count;
 			float instr_per_method = (float) dyn_instr_count / (float) dyn_method_count;
 			float bb_per_method = (float) dyn_bb_count / (float) dyn_method_count;
 		
-			System.out.println("Average number of instructions per basic block: " + instr_per_bb);
-			System.out.println("Average number of instructions per method:      " + instr_per_method);
-			System.out.println("Average number of basic blocks per method:      " + bb_per_method);
+			msg = "Average number of instructions per basic block: " + instr_per_bb 
+			+ "\nAverage number of instructions per method:      " + instr_per_method 
+			+ "\nAverage number of basic blocks per method:      " + bb_per_method;
+			f = new File(metrics_path);
+			try{
+				if(f.exists() && !f.isDirectory()){
+					appendToFile(msg);
+				}
+				else{
+					writeToFile(msg);
+
+				}
+				System.out.println("Average number of instructions per basic block: " + instr_per_bb);
+				System.out.println("Average number of instructions per method:      " + instr_per_method);
+				System.out.println("Average number of basic blocks per method:      " + bb_per_method);
+			}
+			catch(IOException e) {
+				System.out.println("ERROR!" + e);
+			}
 		}
     
 
@@ -203,11 +247,31 @@ public class StatisticsTool
 
 	public static synchronized void printAlloc(String s) 
 		{
-			System.out.println("Allocations summary:");
-			System.out.println("new:            " + newcount);
-			System.out.println("newarray:       " + newarraycount);
-			System.out.println("anewarray:      " + anewarraycount);
-			System.out.println("multianewarray: " + multianewarraycount);
+
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			String string  = dateFormat.format(new Date());
+
+		
+			String msg = string+"\n"+"Allocations summary:\n" + "new:            " + newcount + "\nnewarray:       " + newarraycount
+			+ "\nanewarray:      " + anewarraycount + "\nmultianewarray: " + multianewarraycount;
+			File f = new File(metrics_path);
+			try{
+				if(f.exists() && !f.isDirectory()){
+					appendToFile(msg);
+				}
+				else{
+					writeToFile(msg);
+
+				}
+				System.out.println("Allocations summary:");
+				System.out.println("new:            " + newcount);
+				System.out.println("newarray:       " + newarraycount);
+				System.out.println("anewarray:      " + anewarraycount);
+				System.out.println("multianewarray: " + multianewarraycount);
+			}
+			catch(IOException e) {
+				System.out.println("ERROR!" + e);
+			}
 		}
 
 	public static synchronized void allocCount(int type)
@@ -268,11 +332,30 @@ public class StatisticsTool
 
 	public static synchronized void printLoadStore(String s) 
 		{
-			System.out.println("Load Store Summary:");
-			System.out.println("Field load:    " + fieldloadcount);
-			System.out.println("Field store:   " + fieldstorecount);
-			System.out.println("Regular load:  " + loadcount);
-			System.out.println("Regular store: " + storecount);
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			String string  = dateFormat.format(new Date());
+
+		
+			String msg = string+"\n"+ "Load Store Summary:" + "\nField load:    " + fieldloadcount + "\nField store:   " + fieldstorecount 
+			+ "\nRegular load:  " + loadcount + "\nRegular store: " + storecount;
+			File f = new File(metrics_path);
+			try{
+				if(f.exists() && !f.isDirectory()){
+					appendToFile(msg);
+				}
+				else{
+					writeToFile(msg);
+
+				}
+				System.out.println("Load Store Summary:");
+				System.out.println("Field load:    " + fieldloadcount);
+				System.out.println("Field store:   " + fieldstorecount);
+				System.out.println("Regular load:  " + loadcount);
+				System.out.println("Regular store: " + storecount);
+			}
+			catch(IOException e) {
+				System.out.println("ERROR!" + e);
+			}
 		}
 
 	public static synchronized void LSFieldCount(int type) 
@@ -391,9 +474,25 @@ public class StatisticsTool
 		}
 
 	public static synchronized void printBranch(String foo)
-		{
-			System.out.println("Branch summary:");
-			System.out.println("CLASS NAME" + '\t' + "METHOD" + '\t' + "PC" + '\t' + "TAKEN" + '\t' + "NOT_TAKEN");
+		{	
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			String string  = dateFormat.format(new Date());
+			String msg = string+"\n"+ "Branch summary:\n" + "CLASS NAME" + '\t' + "METHOD" + '\t' + "PC" + '\t' + "TAKEN" + '\t' + "NOT_TAKEN";
+			File f = new File(metrics_path);
+			try{
+				if(f.exists() && !f.isDirectory()){
+					appendToFile(msg);
+				}
+				else{
+					writeToFile(msg);
+
+				}
+				System.out.println("Branch summary:");
+				System.out.println("CLASS NAME" + '\t' + "METHOD" + '\t' + "PC" + '\t' + "TAKEN" + '\t' + "NOT_TAKEN");
+			}
+			catch(IOException e) {
+				System.out.println("ERROR!" + e);
+			}
 			
 			for (int i = 0; i < branch_info.length; i++) {
 				if (branch_info[i] != null) {
@@ -402,7 +501,23 @@ public class StatisticsTool
 			}
 		}
 	
-			
+	private static synchronized void appendToFile(String msg) 
+        throws IOException {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(metrics_path, true));
+            writer.append('\n');
+            writer.append(msg);
+            
+            writer.close();
+    }
+
+    private static synchronized void writeToFile(String msg) 
+        throws IOException {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(metrics_path));
+            writer.write(msg);
+            
+            writer.close();
+    }
+	
 	public static void main(String argv[]) 
 		{
 			if (argv.length < 2 || !argv[0].startsWith("-")) {
